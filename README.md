@@ -65,7 +65,13 @@ alias sail='sh $([ -f sail ] && echo sail || echo vendor/bin/sail)'
 sail up -d
 ```
 
-6. Применяем миграции к бд
+6. Сгенерировать ключ приложения
+
+```bash
+sail artisan key:generate
+```
+
+7. Применяем миграции к бд
 ```bash
 sail artisan migrate 
 ```
