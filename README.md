@@ -76,3 +76,7 @@ sail artisan key:generate
 sail artisan migrate 
 ```
 
+8. Создаём символическую ссылку для storage
+```bash
+sail artisan storage:link
+```
