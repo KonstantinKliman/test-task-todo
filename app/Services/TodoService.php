@@ -42,10 +42,14 @@ class TodoService implements ITodoService
 
         $todo = $this->repository->create($data);
 
-        $tags = $this->getTagsFromRequest($request->validated('tags'));
-        foreach ($tags as $tag) {
-            $tagModel = $this->tagsRepository->create($tag);
-            $this->tagsRepository->attach($tagModel, $todo);
+
+
+        if ($request->has('tags')) {
+            $tags = $this->getTagsFromRequest($request->validated('tags'));
+            foreach ($tags as $tag) {
+                $tagModel = $this->tagsRepository->create($tag);
+                $this->tagsRepository->attach($tagModel, $todo);
+            }
         }
 
         if ($request->hasFile('image')) {

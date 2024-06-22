@@ -27,4 +27,16 @@ class TodoList extends Model
     {
         return $this->hasMany(Todo::class);
     }
+
+    public function permissions()
+    {
+        return $this->hasMany(Permission::class);
+    }
+
+    public function sharedWith()
+    {
+        return $this->belongsToMany(User::class, 'permissions')
+            ->withPivot( 'can_edit')
+            ->withTimestamps();
+    }
 }

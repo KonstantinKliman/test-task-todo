@@ -17,4 +17,19 @@ class UserRepository implements IUserRepository
     {
         return User::query()->where('email', $email)->firstOrFail();
     }
+
+    public function list()
+    {
+        return User::all();
+    }
+
+    public function getById(int $userId)
+    {
+        return User::query()->where('id', $userId)->first();
+    }
+
+    public function getSharedListsByUser(User $user)
+    {
+        return $user->sharedTodoLists;
+    }
 }

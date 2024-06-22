@@ -51,4 +51,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(TodoList::class);
     }
+
+    public function permissions()
+    {
+        return $this->hasMany(Permission::class);
+    }
+
+    public function sharedTodoLists()
+    {
+        return $this->belongsToMany(TodoList::class, 'permissions')
+                    ->withPivot('can_edit')
+                    ->withTimestamps();
+    }
 }

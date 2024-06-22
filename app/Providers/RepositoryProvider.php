@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\Repositories\ImageRepository;
 use App\Repositories\Interfaces\IImageRepository;
+use App\Repositories\Interfaces\IPermissionRepository;
 use App\Repositories\Interfaces\ITagRepository;
 use App\Repositories\Interfaces\ITodoListRepository;
 use App\Repositories\Interfaces\ITodoRepository;
 use App\Repositories\Interfaces\IUserRepository;
+use App\Repositories\PermissionRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TodoListRepository;
 use App\Repositories\TodoRepository;
@@ -26,6 +28,7 @@ class RepositoryProvider extends ServiceProvider
         $this->app->bind(ITodoRepository::class, TodoRepository::class);
         $this->app->bind(IImageRepository::class, ImageRepository::class);
         $this->app->bind(ITagRepository::class, TagRepository::class);
+        $this->app->bind(IPermissionRepository::class, PermissionRepository::class);
     }
 
     /**

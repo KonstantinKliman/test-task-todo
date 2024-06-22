@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\TagController;
 use App\Http\Controllers\Api\v1\TodoController;
 use App\Http\Controllers\Api\v1\TodoListController;
+use App\Http\Controllers\Api\v1\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -16,6 +17,9 @@ Route::prefix('auth')->group(function () {
 Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'todo-lists'], function () {
     Route::post('/', [TodoListController::class, 'create']);
     Route::get('/', [TodoListController::class, 'list']);
+    Route::post('/share', [TodoListController::class, 'share']);
+    Route::get('/shared-lists', [TodoListController::class, 'sharedLists']);
+//    Route::get('/{id}/permissions', [TodoListController::class, 'checkPermission']);
 });
 
 Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'todos'], function () {
@@ -29,4 +33,6 @@ Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'todos'], function () 
 Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'tags'], function () {
     Route::get('/', [TagController::class, 'list']);
 });
+
+Route::get('/users', [UserController::class, 'list'])->middleware('auth:sanctum');
 

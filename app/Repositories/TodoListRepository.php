@@ -17,4 +17,5 @@ class TodoListRepository implements ITodoListRepository
     {
         return TodoList::query()->where('user_id', $userId)->get();
     }
+
 }

@@ -1,3 +1,5 @@
+// const APP_URL = process.env.API_URL || '';
+
 $(document).ready(function() {
     $('form').on('submit', function(event) {
         event.preventDefault();
@@ -33,6 +35,7 @@ $(document).ready(function() {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function (response) {
+                        localStorage.setItem('token', response.token);
                         window.location.href = '/';
                     },
                     error: function (error) {

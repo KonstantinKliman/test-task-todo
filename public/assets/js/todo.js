@@ -7,6 +7,8 @@ $(document).ready(function () {
 
         clearValidation();
 
+        console.log('test');
+
         $.ajax({
             url: '/api/todo-lists',
             method: 'POST',
@@ -30,6 +32,10 @@ $(document).ready(function () {
         var formData = new FormData(form);
         var token = getToken();
         var errorField = $('#todoFormError');
+
+        if (formData.get('tags') === '') {
+            formData.delete('tags');
+        }
 
         clearValidation();
 
@@ -59,6 +65,9 @@ $(document).ready(function () {
                 response.forEach(function (list) {
                     appendTodoListOption(list);
                     appendTodoListContainer(list);
+                    $('#filterBtn').on('click', function () {
+                        fetchFilterTags();
+                    })
                 });
             },
             error: function (error) {
@@ -82,12 +91,16 @@ $(document).ready(function () {
         }).append($("<div>", {
             class: "col-12 d-flex justify-content-between mb-2"
         }).append($("<h3>", {
-            text: list.name
+            text: list.name + " (created by " + list.user.name + ")"
         })).append($("<button>", {
             class: "btn btn-outline-secondary",
             text: "Share(Work in progress)",
-            disabled: true
-            // TODO: Реализовать возможность делиться списками "TODO"
+            id: "shareBtn" + list.id,
+            click: function () {
+                fetchUsersToShare(list.id, list.userId)
+            },
+            "data-bs-toggle": "modal",
+            "data-bs-target": "#shareListModal"
         }))));
 
         $('.todoListContainer').append(todoListContainer);
@@ -119,19 +132,23 @@ $(document).ready(function () {
             id: "todoImg" + todo.id
         })))));
 
+        var cardTitle = $("<h6>", {
+            class: "card-title",
+            text: todo.title
+        });
+
+        todo.tags.forEach(function (tag) {
+            cardTitle.append($("<span>", {
+                class: "badge text-bg-secondary mx-1",
+                text: tag
+            }));
+        });
+
         var cardBody = $("<div>", {
             class: "col-md-10"
         }).append($("<div>", {
             class: "card-body h-100"
-        }).append($("<h6>", {
-            class: "card-title",
-            text: todo.title
-        })).append(todo.tags.map(function (tag) {
-            return $("<span>", {
-                class: "badge text-bg-secondary mx-1",
-                text: tag
-            });
-        })).append($("<p>", {
+        }).append(cardTitle).append($("<p>", {
             class: "card-text text-truncate",
             text: todo.content
         })));
@@ -163,6 +180,23 @@ $(document).ready(function () {
         $('#todoList' + listId).append(todoCard);
     }
 
+    function appendTagsFilterForm(tags) {
+        $('#filterForm').eq(0)[0].innerHTML = '';
+        tags.forEach(function (tag) {
+            $('#filterForm').append($('<div>', {
+                class: "form-check"
+            }).append($('<input>', {
+                class: "form-check-input",
+                value: tag.id,
+                type: "checkbox",
+                id: "todoTagId" + tag.id
+            }).add($('<label>', {
+                class: "form-check-label",
+                for: "todoTag" + tag.name,
+                text: tag.name
+            }))))
+        });
+    }
 
     function handleTodoCreationSuccess(response) {
         $('#todoModal').modal('hide');
@@ -244,6 +278,9 @@ $(document).ready(function () {
             contentType: false,
             headers: getHeaders(token),
             success: function (response) {
+                $('#todoImg' + todo.id).attr('src', response.image);
+                $('#todoLinkImg' + todo.id).attr('href', response.image);
+                $('#editTodoModal').modal('hide');
                 updateTodoImage(response, todo.id);
             },
             error: function (error) {
@@ -254,8 +291,8 @@ $(document).ready(function () {
 
     function updateTodoImage(response, todoId) {
         if (response.image) {
-            $('#todoImg' + todoId).attr('src', response.image.path);
-            $('#todoLinkImg' + todoId).attr('href', response.image.path);
+            $('#todoImg' + todoId).attr('src', response.image);
+            $('#todoLinkImg' + todoId).attr('href', response.image);
         }
         $('#editTodoModal').modal('hide');
     }
@@ -266,19 +303,18 @@ $(document).ready(function () {
     }
 
     function deleteTodoPreview(todo) {
-        $('#deleteTodoConfirmBtn').off('click').on('click', function () {
-            deleteTodoItem(todo);
-        });
+        $('#todoDeleteBtn' + todo.id).off('click').on('click', deleteTodoImage(todo));
     }
 
-    function deleteTodoItem(todo) {
+    function deleteTodoImage(todo) {
         var token = getToken();
         $.ajax({
             url: "/api/todos/" + todo.id,
             method: "DELETE",
             headers: getHeaders(token),
             success: function () {
-                $('#todoCard' + todo.id).remove();
+                $('#todoImg' + todo.id).attr('src', "/assets/img/not-found.png");
+                $('#todoLinkImg' + todo.id).attr('href', "/assets/img/not-found.png");
             },
             error: function (error) {
                 console.error(error);
@@ -286,14 +322,99 @@ $(document).ready(function () {
         });
     }
 
+    function fetchUsersToShare(listId, listUserId) {
+        var token = getToken();
+
+        $.ajax({
+            url: '/api/users',
+            method: 'GET',
+            headers: getHeaders(token),
+            success: function (response) {
+                appendShareUsersOption(response, listUserId);
+                $('#shareListBtn').on('click', function (event) {
+                    event.preventDefault();
+                    var form = $('#shareListForm')[0];
+                    var formData = new FormData(form);
+
+                    formData.set('todoListId', listId);
+                    formData.set('canEdit', $('#canEditCheck').is(':checked') ? 1 : 0);
+                    $.ajax({
+                        url: "api/todo-lists/share",
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        headers: getHeaders(token),
+                        success: function (response) {
+                            $('#shareListModal').modal('hide')
+                        },
+                        error: function (error) {
+                            console.log(error);
+                        }
+                    })
+                })
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        })
+    }
+
+    function appendShareUsersOption(response, listUserId) {
+        $('#selectUserId').eq(0)[0].innerHTML = '';
+        response.forEach(function (user) {
+            if (user.id !== listUserId) {
+                $('#selectUserId').eq(0)[0].innerHTML += '<option value="' + user.id + '">' + user.name + '</option>';
+            }
+        });
+    }
+
+    function fetchFilterTags() {
+        var token = getToken();
+
+        $.ajax({
+            url: '/api/tags',
+            method: 'GET',
+            headers: getHeaders(token),
+            success: function (response) {
+                appendTagsFilterForm(response);
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        })
+    }
+
+    function fetchSharedLists() {
+        var token = getToken();
+
+        $.ajax({
+            url: '/api/todo-lists/shared-lists',
+            method: 'GET',
+            headers: getHeaders(token),
+            success: function (response) {
+                response.forEach(function (list) {
+                    appendTodoListOption(list);
+                    appendTodoListContainer(list);
+                })
+                console.log(response);
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        })
+    }
+
+    fetchSharedLists();
+
     fetchTodoLists();
 
-    $('#createTodoListForm').submit(function (event) {
+    $('#createTodoListBtn').on('click', function (event) {
         event.preventDefault();
         createTodoList();
     });
 
-    $('#createTodoForm').submit(function (event) {
+    $('#createTodoBtn').on('click', function (event) {
         event.preventDefault();
         createTodo();
     });

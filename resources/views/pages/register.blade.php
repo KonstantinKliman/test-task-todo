@@ -20,5 +20,5 @@
         </form>
     </div>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="{{ asset('assets/js/login.js') }}"></script>
+    <script src="{{ asset('assets/js/register.js') }}"></script>
 @endsection

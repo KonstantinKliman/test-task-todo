@@ -5,7 +5,7 @@
     <div class="user-content" id="userContent">
         <div class="d-flex my-2 justify-content-between">
             <div>
-                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#filterModal" id="filterBtn">
                     Filter by tag
                 </button>
                 <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel"
@@ -162,6 +162,33 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-primary" id="saveEditTodoImgBtn">Save changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="shareListModal" tabindex="-1" aria-labelledby="shareListModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="shareListModalLabel">Share TODO list</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="shareListForm">
+                                    <select class="form-select mb-2" aria-label="Default select example" name="userId" id="selectUserId">
+                                        <option selected disabled>Choose user</option>
+                                    </select>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" name="canEdit" id="canEditCheck">
+                                        <label class="form-check-label" for="canEditCheck">
+                                            Can edit
+                                        </label>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="shareListBtn">Share</button>
                             </div>
                         </div>
                     </div>
